@@ -1,6 +1,6 @@
-# WHT MacOS v1.2
+# WHT MacOS v1.3
 
-GitHub-ready source for **WHT MacOS v1.2**. GitHub Actions builds installable
+GitHub-ready source for **WHT MacOS v1.3**. GitHub Actions builds installable
 macOS packages for Apple Silicon (`arm64`) and Intel (`x64`) MacBooks.
 
 ## Build with GitHub
