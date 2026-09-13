@@ -9,7 +9,7 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "electron .",
-    "dist:mac": "electron-builder --mac dmg zip"
+    "dist:mac": "electron-builder --mac dmg zip --publish never"
   },
   "devDependencies": {
     "electron": "^38.8.6",

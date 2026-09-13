@@ -23,4 +23,8 @@ With Node.js 22 or newer, run `npm ci` followed by `npm start`. On a Mac,
 
 Exports are saved under `Documents/WHT/Exports`.
 
+The build explicitly disables Electron Builder's automatic GitHub Release
+publishing. No `GH_TOKEN` secret is required; completed installers appear under
+the workflow run's **Artifacts** section.
+
 © 2026 Mark Breddy · Puffins
