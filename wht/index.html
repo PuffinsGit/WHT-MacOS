@@ -187,45 +187,42 @@
       }
       .home-screen {
         min-height: calc(100vh - 120px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        display: block;
         padding: 32px 20px;
         box-sizing: border-box;
       }
-      .home-development {
-        width: min(520px, 100%);
-        text-align: center;
-        padding: 42px 34px;
+      .home-dashboard { width: min(720px, 100%); margin: 0 auto; }
+      .home-dashboard-head { margin-bottom: 20px; }
+      .home-dashboard-head h1 { margin: 0 0 6px; font-size: 25px; letter-spacing: -.4px; }
+      .home-dashboard-head p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+      .home-widgets { display: grid; gap: 14px; }
+      .home-widget {
+        padding: 18px;
         background: linear-gradient(180deg, #151a24, #11161f);
-        border: 1px solid #293241;
-        border-radius: 18px;
-        box-shadow: 0 18px 42px rgba(0, 0, 0, 0.18);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 14px 34px rgba(0, 0, 0, .16);
       }
-      .home-development-icon {
-        width: 54px;
-        height: 54px;
-        margin: 0 auto 18px;
-        display: grid;
-        place-items: center;
-        border-radius: 14px;
-        background: rgba(118, 81, 255, 0.12);
-        border: 1px solid rgba(118, 81, 255, 0.28);
-        color: var(--purple2);
-        font-size: 25px;
+      :root[data-theme="light"] .home-widget { background: #fff; }
+      .home-widget-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+      .home-widget-title { font-size: 15px; font-weight: 900; }
+      .home-widget-tools { display: flex; gap: 6px; }
+      .home-widget-tools button { width: 30px; height: 30px; padding: 0; color: var(--muted); }
+      .home-widget-value { font-size: 23px; font-weight: 900; }
+      .home-widget-note { margin-top: 5px; color: var(--muted); font-size: 12px; }
+      .home-widget-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+      .home-widget-actions button { flex: 1 1 145px; min-height: 43px; font-weight: 850; }
+      .home-widget-actions .clock-in { background: #238b45; border-color: #2aa653; }
+      .home-widget-actions .clock-out { background: #c73d52; border-color: #db4a5f; }
+      .home-widget-add {
+        display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 13px;
+        padding: 16px 18px; border: 1px dashed #59657a; border-radius: 16px;
+        background: rgba(17, 22, 31, .62);
       }
-      .home-development h1 {
-        margin: 0 0 9px;
-        font-size: 24px;
-        font-weight: 900;
-        letter-spacing: -0.5px;
-      }
-      .home-development p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.55;
-      }
+      :root[data-theme="light"] .home-widget-add { background: rgba(255, 255, 255, .74); }
+      .home-widget-add-icon { color: var(--purple2); font-size: 24px; font-weight: 900; }
+      .home-widget-add label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 850; }
+      .home-widget-add select { width: 100%; min-height: 42px; }
       .home-screen[hidden] {
         display: none;
       }
@@ -1524,7 +1521,7 @@
       <div id="sidebarTools"></div>
       <div id="scheduleActionsSlot" hidden></div>
       <div class="sidebar-footer">
-        <div class="sidebar-copyright">© 2026 Mark Breddy · Puffins<span class="app-version">WorkedHours Tracker (WHT) MacOS ALPHA v1.1</span></div>
+        <div class="sidebar-copyright">© 2026 Mark Breddy · Puffins<span class="app-version">WorkedHours Tracker (WHT) MacOS ALPHA v1.2</span></div>
         <div class="sidebar-footer-actions">
           <button type="button" class="sidebar-settings-button" id="sidebarSettingsBtn" aria-label="Open settings" title="Settings">⚙</button>
         </div>
@@ -1543,10 +1540,12 @@
         <div class="clocked-in-indicator" id="clockedInIndicator" hidden>Clocked In</div>
       </header>
       <section class="home-screen" id="homeScreen" hidden>
-        <div class="home-development">
-          <div class="home-development-icon" aria-hidden="true">✦</div>
-          <h1>In Development</h1>
-          <p>Coming Soon</p>
+        <div class="home-dashboard">
+          <div class="home-dashboard-head">
+            <h1>My Home</h1>
+            <p>Add the shortcuts and information you want close at hand.</p>
+          </div>
+          <div class="home-widgets" id="homeWidgets"></div>
         </div>
       </section>
       <section class="report-screen" id="reportIssueScreen" hidden>
@@ -1630,7 +1629,7 @@
       <div class="note" id="workNote">
         Your entries are saved automatically to this device. A backup copy is also kept in Documents/WHT so it can survive an app reinstall.
       </div>
-      <footer class="copyright">© 2026 Mark Breddy · Puffins<span class="app-version">WorkedHours Tracker (WHT) MacOS ALPHA v1.1</span></footer>
+      <footer class="copyright">© 2026 Mark Breddy · Puffins<span class="app-version">WorkedHours Tracker (WHT) MacOS ALPHA v1.2</span></footer>
     </div>
 
     <div class="modalback" id="modalBack">
@@ -1718,6 +1717,10 @@
       function normaliseState(target) {
         target.entries = target.entries || {};
         target.scheduleEntries = target.scheduleEntries || {};
+        const validHomeWidgets = ["clock", "today", "nextShift", "week", "navigation"];
+        target.homeWidgets = Array.isArray(target.homeWidgets)
+          ? [...new Set(target.homeWidgets.filter((widget) => validHomeWidgets.includes(widget)))]
+          : [];
         target.weekdayRate = target.weekdayRate ?? 0;
         target.saturdayRate = target.saturdayRate ?? 0;
         target.sundayRate = target.sundayRate ?? 0;
@@ -2449,7 +2452,7 @@
         context.textAlign = "right";
         context.fillText("© 2026 Mark Breddy · Puffins", 1330, y);
         context.font = "500 14px system-ui,sans-serif";
-        context.fillText("WorkedHours Tracker (WHT) MacOS ALPHA v1.1", 1330, y + 20);
+        context.fillText("WorkedHours Tracker (WHT) MacOS ALPHA v1.2", 1330, y + 20);
         context.restore();
       }
       function drawPaydayMarker(context, row, x, y) {
@@ -2663,7 +2666,7 @@
             "",
           );
         });
-        lines.push("", `Total Hours: ${hoursMinutesLabel(totalHours)}`, `Estimated Gross Pay: ${money(totalPay)}`, exportAsOfLabel(), "", "© 2026 Mark Breddy · Puffins", "WorkedHours Tracker (WHT) MacOS ALPHA v1.1");
+        lines.push("", `Total Hours: ${hoursMinutesLabel(totalHours)}`, `Estimated Gross Pay: ${money(totalPay)}`, exportAsOfLabel(), "", "© 2026 Mark Breddy · Puffins", "WorkedHours Tracker (WHT) MacOS ALPHA v1.2");
         return lines.join("\n");
       }
       async function saveTxtDocument(content, fileName, exportType = "worked") {
@@ -3260,7 +3263,7 @@
           `Expected Hours: ${hoursMinutesLabel(row.hours)} | Rate: ${money(row.rate)}/h | Expected Gross Pay: ${money(row.pay)}`,
           "",
         ));
-        lines.push("", `Expected Hours: ${hoursMinutesLabel(totalHours)}`, `Expected Gross Pay: ${money(totalPay)}`, "", "© 2026 Mark Breddy · Puffins", "WorkedHours Tracker (WHT) MacOS ALPHA v1.1");
+        lines.push("", `Expected Hours: ${hoursMinutesLabel(totalHours)}`, `Expected Gross Pay: ${money(totalPay)}`, "", "© 2026 Mark Breddy · Puffins", "WorkedHours Tracker (WHT) MacOS ALPHA v1.2");
         return lines.join("\n");
       }
 
@@ -3463,6 +3466,113 @@
         saveTxtDocument(scheduleTxt(rows, `${fmtDate(start, false)} – ${fmtDate(end, true)}`), `schedule-${startValue}-to-${endValue}.txt`, "schedule");
       };
 
+      const homeWidgetDefinitions = {
+        clock: "Clock In / Out",
+        today: "Today's Hours",
+        nextShift: "Next Scheduled Shift",
+        week: "This Week",
+        navigation: "Quick Access"
+      };
+
+      function homeWidgetTools(type, index) {
+        return `<div class="home-widget-tools">
+          <button type="button" data-home-action="up" data-index="${index}" aria-label="Move widget up" title="Move up">↑</button>
+          <button type="button" data-home-action="down" data-index="${index}" aria-label="Move widget down" title="Move down">↓</button>
+          <button type="button" data-home-action="remove" data-widget="${type}" aria-label="Remove widget" title="Remove">×</button>
+        </div>`;
+      }
+
+      function nextScheduledShift() {
+        const today = iso(new Date());
+        return Object.entries(state.scheduleEntries)
+          .filter(([date, entry]) => date >= today && entry && (entry.start || entry.finish))
+          .sort(([a], [b]) => a.localeCompare(b))[0] || null;
+      }
+
+      function homeWidgetBody(type) {
+        const now = new Date();
+        const todayEntry = state.entries[iso(now)] || {};
+        if (type === "clock") {
+          const active = Boolean(todayEntry.start && !todayEntry.finish);
+          return `<div class="home-widget-actions">
+            <button type="button" class="clock-in" data-home-action="clock-in">Clock In</button>
+            <button type="button" class="clock-out" data-home-action="clock-out">Clock Out</button>
+          </div><div class="home-widget-note">${active ? `Clocked in at ${displayTime(todayEntry.start)}` : todayEntry.finish ? `Last clocked out at ${displayTime(todayEntry.finish)}` : "Not clocked in today"}</div>`;
+        }
+        if (type === "today") {
+          const hours = paidHoursForEntry(todayEntry);
+          const times = todayEntry.start ? `${displayTime(todayEntry.start)} – ${displayTime(todayEntry.finish)}` : "No hours entered yet";
+          return `<div class="home-widget-value">${hoursMinutesLabel(hours)}</div><div class="home-widget-note">${times}</div>`;
+        }
+        if (type === "nextShift") {
+          const shift = nextScheduledShift();
+          if (!shift) return `<div class="home-widget-value">No upcoming shift</div><div class="home-widget-note">Add a shift in Schedule.</div>`;
+          const [date, entry] = shift;
+          const label = new Date(date + "T00:00:00").toLocaleDateString("en-AU", { weekday: "long", day: "numeric", month: "short" });
+          return `<div class="home-widget-value">${displayTime(entry.start)} – ${displayTime(entry.finish)}</div><div class="home-widget-note">${label}</div>`;
+        }
+        if (type === "week") {
+          const start = monday(now);
+          let hours = 0;
+          let gross = 0;
+          for (let i = 0; i < 7; i += 1) {
+            const date = new Date(start);
+            date.setDate(start.getDate() + i);
+            const entry = state.entries[iso(date)] || {};
+            const dayHours = paidHoursForEntry(entry);
+            const day = date.getDay();
+            const dayRate = day === 6 ? Number(state.saturdayRate || 0) : day === 0 ? Number(state.sundayRate || 0) : Number(state.weekdayRate || 0);
+            hours += dayHours;
+            gross += dayHours * dayRate;
+          }
+          return `<div class="home-widget-value">${hoursMinutesLabel(hours)}</div><div class="home-widget-note">Estimated gross ${money(gross)}</div>`;
+        }
+        return `<div class="home-widget-actions">
+          <button type="button" data-home-action="worked-hours">Worked Hours</button>
+          <button type="button" data-home-action="schedule">Schedule</button>
+          <button type="button" data-home-action="settings">Settings</button>
+        </div>`;
+      }
+
+      function renderHomeWidgets() {
+        const container = document.getElementById("homeWidgets");
+        const cards = state.homeWidgets.map((type, index) => `<article class="home-widget">
+          <div class="home-widget-head"><div class="home-widget-title">${homeWidgetDefinitions[type]}</div>${homeWidgetTools(type, index)}</div>
+          ${homeWidgetBody(type)}
+        </article>`).join("");
+        const available = Object.entries(homeWidgetDefinitions).filter(([type]) => !state.homeWidgets.includes(type));
+        const options = available.map(([type, label]) => `<option value="${type}">${label}</option>`).join("");
+        container.innerHTML = cards + (available.length ? `<div class="home-widget-add">
+          <div class="home-widget-add-icon" aria-hidden="true">＋</div>
+          <div><label for="addHomeWidget">Add Widget</label><select id="addHomeWidget"><option value="">Choose a widget…</option>${options}</select></div>
+        </div>` : "");
+      }
+
+      document.getElementById("homeWidgets").addEventListener("change", (event) => {
+        if (event.target.id !== "addHomeWidget" || !event.target.value) return;
+        state.homeWidgets.push(event.target.value);
+        save();
+        renderHomeWidgets();
+      });
+
+      document.getElementById("homeWidgets").addEventListener("click", (event) => {
+        const button = event.target.closest("button[data-home-action]");
+        if (!button) return;
+        const action = button.dataset.homeAction;
+        if (action === "remove") state.homeWidgets = state.homeWidgets.filter((type) => type !== button.dataset.widget);
+        else if (action === "up" || action === "down") {
+          const index = Number(button.dataset.index);
+          const other = action === "up" ? index - 1 : index + 1;
+          if (other >= 0 && other < state.homeWidgets.length) [state.homeWidgets[index], state.homeWidgets[other]] = [state.homeWidgets[other], state.homeWidgets[index]];
+        } else if (action === "clock-in") { clockCurrentTime("start"); return; }
+        else if (action === "clock-out") { clockCurrentTime("finish"); return; }
+        else if (action === "worked-hours") { showWorkScreen(); return; }
+        else if (action === "schedule") { showScheduleScreen(); return; }
+        else if (action === "settings") { openSettingsHub(); return; }
+        save();
+        renderHomeWidgets();
+      });
+
       function setScreenVisibility(screen) {
         const isHome = screen === "home";
         const isSchedule = screen === "schedule";
@@ -3501,6 +3611,7 @@
       function showHomeScreen() {
         activeScreen = "home";
         setScreenVisibility("home");
+        renderHomeWidgets();
         scrollPageTop();
       }
 
@@ -3542,7 +3653,7 @@
           toast("Please enter a title and description");
           return;
         }
-        const body = `Title: ${title}\n\nDescription:\n${description}\n\nApp version: WorkedHours Tracker (WHT) MacOS ALPHA v1.1`;
+        const body = `Title: ${title}\n\nDescription:\n${description}\n\nApp version: WorkedHours Tracker (WHT) MacOS ALPHA v1.2`;
         window.location.href = `mailto:${REPORT_ISSUE_EMAIL}?subject=${encodeURIComponent(REPORT_ISSUE_SUBJECT)}&body=${encodeURIComponent(body)}`;
         returnFromIssueReport();
       }
