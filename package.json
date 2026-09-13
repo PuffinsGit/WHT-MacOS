@@ -1,0 +1,35 @@
+{
+  "name": "worked-hours-tracker",
+  "productName": "WorkedHoursTracker",
+  "version": "1.1.0",
+  "private": true,
+  "description": "WorkedHoursTracker (WHT) for macOS",
+  "author": "Mark Breddy (Puffins)",
+  "license": "UNLICENSED",
+  "main": "electron/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:mac": "electron-builder --mac dmg zip"
+  },
+  "devDependencies": {
+    "electron": "^38.8.6",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.puffins.workedhourstracker",
+    "productName": "WorkedHoursTracker",
+    "copyright": "© 2026 Mark Breddy · Puffins",
+    "asar": true,
+    "directories": { "output": "dist", "buildResources": "resources" },
+    "files": ["electron/**/*", "wht/**/*", "package.json"],
+    "mac": {
+      "category": "public.app-category.productivity",
+      "icon": "resources/icon.png",
+      "target": ["dmg", "zip"],
+      "artifactName": "WHT-ALPHA-v1.1-${arch}.${ext}",
+      "identity": null,
+      "hardenedRuntime": false
+    },
+    "dmg": { "title": "WHT ALPHA v1.1", "sign": false }
+  }
+}
